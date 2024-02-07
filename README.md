@@ -1,23 +1,10 @@
-# TypeScript Node Template
+# BitBucket to GitHub Migrator
 
-Template for creating a TypeScript Node.js project.
+Migrate PRs from BB to GH.
 
-## 🔨 Build
-```
-npm run build
-```
 
-## 🧪 Test
-```
-npm test
-```
+## Usage
 
-## 🏃 Run
-```
-npm start
-```
-
-## 🧹 Lint 
-```
-npm lint
+```sh
+npx bitbucket-github-migrator
 ```

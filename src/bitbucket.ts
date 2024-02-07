@@ -28,8 +28,8 @@ export class BitBucket {
 
   async listPullRequests(workspace: string, repo_slug: string) {
     if (this.prs && this.prs[repo_slug]) return this.prs[repo_slug];
+    const prs: PullRequest[] = [];
     let response: PullRequestResponse;
-    let prs: PullRequest[] = [];
     do {
       response = await fetch(`https://api.bitbucket.org/2.0/repositories/${workspace}/${repo_slug}/pullrequests`, this.init)
         .then(res => res.json() as Promise<PullRequestResponse>);
@@ -39,11 +39,13 @@ export class BitBucket {
   }
 
   async listRepositories(workspace: string) {
-    if (this.repos) return this.repos;
-    let response: RepositoryResponse;
-    let repos: Repository[] = [];
+    if (this.repos.length > 0) return this.repos;
+    const repos: Repository[] = [];
+    let response: RepositoryResponse = {
+      next: `https://api.bitbucket.org/2.0/repositories/${workspace}`
+    } as RepositoryResponse;
     do {
-      response = await fetch(`https://api.bitbucket.org/2.0/repositories/${workspace}`, this.init)
+      response = await fetch(response.next, this.init)
         .then(res => res.json() as Promise<RepositoryResponse>);
       repos.push(...response.values);
     } while (response.next)

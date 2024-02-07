@@ -1,6 +1,17 @@
+type Href = {
+  href: string;
+};
+
 type Link = {
   href: string;
   name: string;
+};
+
+type Links = {
+  self: Href;
+  avatar: Href;
+  html: Href;
+  [key: string]: Href;
 };
 
 type Rendered = {
@@ -53,6 +64,11 @@ type PullRequest = {
     branch: {
       name: string;
     };
+    commit: {
+      hash: string;
+      links: Links;
+      type: string;
+    };
     repository: Repository;
   };
   destination: {
@@ -77,13 +93,15 @@ type PullRequest = {
   participants: Participant[];
 };
 
+type CustomPullRequest = PullRequest & { comments: PullRequestComment[] };
+
 type PullRequestResponse = {
   size: number;
   page: number;
   pagelen: number;
   next: string;
   previous: string;
-  values: PullRequest[];
+  values: CustomPullRequest[];
 };
 
 type Clone = {
@@ -144,4 +162,135 @@ type RepositoryResponse = {
   values: Repository[];
 };
 
-export { PullRequest, PullRequestResponse, Repository, RepositoryResponse }
+type Reporter = {
+  type: string;
+};
+
+type Assignee = {
+  type: string;
+};
+
+type Milestone = {
+  type: string;
+};
+
+type Version = {
+  type: string;
+};
+
+type Component = {
+  type: string;
+};
+
+type Content = {
+  raw: string;
+  markup: string;
+  html: string;
+};
+
+type Issue = {
+  type: string;
+  links: {
+    self: Link;
+    html: Link;
+    comments: Link;
+    attachments: Link;
+    watch: Link;
+    vote: Link;
+  };
+  id: number;
+  repository: Repository;
+  title: string;
+  reporter: Reporter;
+  assignee: Assignee;
+  created_on: string;
+  updated_on: string;
+  edited_on: string;
+  state: string;
+  kind: string;
+  priority: string;
+  milestone: Milestone;
+  version: Version;
+  component: Component;
+  votes: number;
+  content: Content;
+};
+
+type IssueResponse = {
+  size: number;
+  page: number;
+  pagelen: number;
+  next: string;
+  previous: string;
+  values: Issue[];
+};
+
+type Resolution = {
+  type: string;
+};
+
+type User = {
+  display_name: string;
+  links: {
+    self: Link;
+    avatar: Link;
+    html: Link;
+  };
+  type: string;
+  uuid: string;
+  account_id: string;
+  nickname: string;
+};
+
+type Parent = {
+  id: number;
+  links: {
+    self: Link;
+    html: Link;
+  };
+};
+
+type Inline = {
+  from: number | null;
+  to: number;
+  path: string;
+};
+
+type PullRequestComment = {
+  id: number;
+  created_on: string;
+  updated_on: string;
+  content: Content;
+  user: User;
+  deleted: boolean;
+  parent?: Parent;
+  inline?: Inline;
+  pending: boolean;
+  type: string;
+  links: {
+    self: Link;
+    html: Link;
+    code?: Link;
+  };
+  pullrequest: PullRequest;
+};
+
+type PullRequestCommentResponse = {
+  size: number;
+  page: number;
+  pagelen: number;
+  next: string;
+  previous: string;
+  values: PullRequestComment[];
+};
+
+export {
+  CustomPullRequest as PullRequest,
+  PullRequestResponse,
+  Repository,
+  RepositoryResponse,
+  IssueResponse,
+  Issue,
+  PullRequestCommentResponse,
+  PullRequestComment
+}

@@ -1,5 +1,6 @@
 import { Migrate } from "./migrate";
 import inquirer from 'inquirer';
+import 'dotenv/config'
 
 const questions = [] as {
   type: string;
@@ -42,7 +43,10 @@ inquirer.prompt(questions).then(answers => {
     bitbucketToken: process.env.BITBUCKET_TOKEN || answers.bitbucketToken,
     bitbucketWorkspace: process.env.BITBUCKET_WORKSPACE || answers.bitbucketWorkspace,
     githubToken: process.env.GITHUB_TOKEN || answers.githubToken,
-    githubOwner: process.env.GITHUB_ORG || answers.githubOwner
+    githubOwner: process.env.GITHUB_ORG || answers.githubOwner,
+    bitbucketThrottling: {
+      timeout: parseInt(process.env.BITBUCKET_THROTTLE || '0')
+    }
   });
   migrate.run();
 });

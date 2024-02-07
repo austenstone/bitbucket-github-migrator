@@ -35,7 +35,6 @@ export class Migrate {
             base: pr.destination.branch.name,
             body: pr.summary.markup,
             head_repo: pr.source?.repository?.full_name,
-            draft: pr.state === 'OPEN'
           });
         } catch (err) {
           if ((err as any).status === 422) {

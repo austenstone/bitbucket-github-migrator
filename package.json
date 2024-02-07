@@ -1,9 +1,13 @@
 {
-  "name": "markdown-interpolation",
-  "version": "1.5.0",
-  "description": "Add an issue or pull request to a project",
-  "main": "lib/markdown.js",
-  "types": "lib/markdown.d.ts",
+  "name": "bitbucket-github-migrator",
+  "version": "1.1.0",
+  "description": "A tool to migrate repositories from Bitbucket to GitHub",
+  "bin": {
+    "bitbucket-github-migrator": "dist/index.js"
+  },
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
@@ -19,7 +23,7 @@
   "readme": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/austenstone/markdown-interpolation.git"
+    "url": "https://github.com/austenstone/bitbucket-github-migrator.git"
   },
   "license": "MIT",
   "devDependencies": {
@@ -34,5 +38,13 @@
     "ts-jest": "^29.1.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
-  }
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "inquirer": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "support": true
 }

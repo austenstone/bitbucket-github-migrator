@@ -35,4 +35,8 @@ export class GitHub {
   async createPullRequestReviewComment(request: Endpoints["POST /repos/{owner}/{repo}/pulls/{pull_number}/comments"]["parameters"]) {
     return this.octokit.pulls.createReviewComment(request);
   }
+
+  async createRepository(request: Endpoints["POST /orgs/{org}/repos"]["parameters"]) {
+    return this.octokit.repos.createInOrg(request);
+  }
 }

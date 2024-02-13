@@ -1,6 +1,8 @@
 import { BitBucket } from "./bitbucket";
 import { GitHub } from "./github";
 
+import { SimpleGit, simpleGit } from "simple-git";
+
 export interface MigrateOptions {
   bitbucketWorkspace: string;
   githubOwner: string;
@@ -15,20 +17,52 @@ export class Migrate {
   bitbucket: BitBucket;
   github: GitHub;
   options: MigrateOptions;
+  git: SimpleGit;
 
   constructor(options: MigrateOptions) {
     this.options = options;
     this.bitbucket = new BitBucket(this.options.bitbucketToken, this.options.bitbucketThrottling?.timeout);
     this.github = new GitHub(this.options.githubToken);
+    this.git = simpleGit();
   }
 
   async run() {
     if (!this.options.bitbucketWorkspace) throw new Error('bitbucketWorkspace input is required');
     if (!this.options.githubOwner) throw new Error('githubOwner input is required');
     console.log(`🚀 Migrating from Bitbucket workspace '${this.options.bitbucketWorkspace}' to GitHub org '${this.options.githubOwner}'`)
+
+    const root = process.cwd();
+    for (const repo of await this.bitbucket.getRepositories(this.options.bitbucketWorkspace)) {
+      console.log(`🔄 Git Mirror ${repo.full_name} from Bitbucket to GitHub`)
+      const remote = {
+        source: repo.links.clone[0].href,
+        target: `https://github.com/${this.options.githubOwner}/${repo.name}.git`
+      }
+      const path = `${root}/_repos/${repo.name}`;
+      console.log(`➕ Create GitHub repository ${repo.name}`)
+      await this.github.createRepository({
+        org: this.options.githubOwner,
+        name: repo.name,
+      }).catch(err => {
+        if (err.message.includes('already exists')) return;
+      });
+      await this.git.mirror(remote.source, path)
+        .catch(err => {
+          if (err.message.includes('already exists')) return;
+        })
+      await this.git.cwd(path)
+      await this.git.addRemote('github', `https://github.com/${this.options.githubOwner}/${repo.name}.git`)
+        .catch(err => {
+          if (err.message.includes('already exists')) return;
+        })
+      await this.git.branch(['-M', 'main'])
+        .push('--mirror', 'github')
+        .cwd(root);
+      console.log(`✅ Mirrored ${repo.full_name} from Bitbucket to GitHub`)
+    }
+    
     const pullRequests = await this.bitbucket.listAllPullRequests(this.options.bitbucketWorkspace);
     console.log(`🔍 Found ${Object.values(pullRequests).reduce((acc, repoInfo) => acc + repoInfo.prs.length, 0)} pull requests to migrate`)
-    
     for (const [repo, repoInfo] of Object.entries(pullRequests)) {
       for (const pr of repoInfo.prs) {
         const responsePr = await this.github.createPullRequest({

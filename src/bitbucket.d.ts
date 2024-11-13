@@ -154,12 +154,16 @@ type Repository = {
 };
 
 type RepositoryResponse = {
+  type?: 'error',
   size: number;
   page: number;
   pagelen: number;
   next: string;
   previous: string;
   values: Repository[];
+  error: {
+    message: string
+  }
 };
 
 type Reporter = {

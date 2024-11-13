@@ -49,7 +49,14 @@ export class BitBucket {
       next: `https://api.bitbucket.org/2.0/repositories/${workspace}`
     } as RepositoryResponse;
     do {
-      response = await this._fetch(response.next);
+      try {
+        response = await this._fetch(response.next);
+      } catch (e) {
+        console.error(e);
+      }
+      if (response.type === 'error') {
+        throw new Error(response.error.message);
+      }
       repos.push(...response.values);
     } while (response.next)
     this.repos = repos;

@@ -24,6 +24,10 @@ export class GitHub {
     });
   }
 
+  async getOrgs() {
+    return this.octokit.orgs.listForAuthenticatedUser();
+  }
+
   async createPullRequest(request: Endpoints["POST /repos/{owner}/{repo}/pulls"]["parameters"]) {
     return this.octokit.pulls.create(request);
   }

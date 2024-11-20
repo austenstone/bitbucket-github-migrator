@@ -19,6 +19,9 @@ export class GitHub {
             },
         });
     }
+    async getOrgs() {
+        return this.octokit.orgs.listForAuthenticatedUser();
+    }
     async createPullRequest(request) {
         return this.octokit.pulls.create(request);
     }

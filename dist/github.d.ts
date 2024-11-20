@@ -3,6 +3,20 @@ import { Endpoints } from '@octokit/types';
 export declare class GitHub {
     octokit: Octokit;
     constructor(token: string);
+    getOrgs(): Promise<import("@octokit/types").OctokitResponse<{
+        login: string;
+        id: number;
+        node_id: string;
+        url: string;
+        repos_url: string;
+        events_url: string;
+        hooks_url: string;
+        issues_url: string;
+        members_url: string;
+        public_members_url: string;
+        avatar_url: string;
+        description: string | null;
+    }[], 200>>;
     createPullRequest(request: Endpoints["POST /repos/{owner}/{repo}/pulls"]["parameters"]): Promise<import("@octokit/types").OctokitResponse<{
         url: string;
         id: number;

@@ -1,24 +1,47 @@
 #!/usr/bin/env node
 import { Migrate } from "./migrate.js";
 import inquirer, { DistinctQuestion } from 'inquirer';
+import { Command } from 'commander';
 import 'dotenv/config'
+import { GitHub } from "./github.js";
 
 const questions: DistinctQuestion[] = [];
 
-if (!process.env.GITHUB_TOKEN) {
-  questions.push({
+const commander = new Command();
+commander
+  .name('bitbucket-github-migrator')
+  .description('Migrate from Bitbucket to GitHub')
+  .version('1.6.1', '-v, --version')
+  .option('-bt, --bitbucket-token <token>', 'Bitbucket token')
+  .option('-gt, --github-token <token>', 'GitHub token')
+  .parse();
+
+const options = commander.opts();
+
+if (!process.env.GITHUB_TOKEN ) {
+  const question = {
     type: 'input',
     name: 'githubToken',
     message: 'GitHub token',
-    default: 'ghp_1234567890abcdefghijklmnopqrstuvwxyz'
-  });
+    default: 'ghp_1234567890abcdefghijklmnopqrstuvwxyz',
+    when: () => !options.githubToken
+  } as DistinctQuestion;
+  const answers = await inquirer.prompt(question);
+  process.env.GITHUB_TOKEN = options.githubToken || answers.githubToken
+  questions.push(question);
 }
+
 if (!process.env.GITHUB_ORG) {
+  const orgs = await new GitHub(process.env.GITHUB_TOKEN!).getOrgs().catch(() => {
+    console.log('⚠️  Failed to fetch orgs');
+  });
   questions.push({
-    type: 'input',
+    type: orgs ? 'checkbox' : 'input',
     name: 'githubOwner',
     message: 'What is the destination GitHub org',
-    default: 'my-org'
+    choices: orgs?.data.map((org: { login: string }) => org.login),
+    required: true,
+    askAnswered: false
   });
 }
 
@@ -50,7 +73,8 @@ questions.push({
     { name: 'Wiki', value: 'wiki', disabled: 'not yet implemented' },
     { name: 'Projects', value: 'projects', disabled: 'not yet implemented' },
   ],
-  required: true
+  required: true,
+  askAnswered: false
 })
 
 inquirer.prompt(questions).then(answers => {

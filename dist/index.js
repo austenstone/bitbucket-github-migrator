@@ -1,12 +1,7 @@
 #!/usr/bin/env node
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const migrate_1 = require("./migrate");
-const inquirer_1 = __importDefault(require("inquirer"));
-require("dotenv/config");
+import { Migrate } from "./migrate.js";
+import inquirer from 'inquirer';
+import 'dotenv/config';
 const questions = [];
 if (!process.env.GITHUB_TOKEN) {
     questions.push({
@@ -53,8 +48,8 @@ questions.push({
     ],
     required: true
 });
-inquirer_1.default.prompt(questions).then(answers => {
-    const migrate = new migrate_1.Migrate({
+inquirer.prompt(questions).then(answers => {
+    const migrate = new Migrate({
         whatToMigrate: answers.whatToMigrate,
         bitbucketToken: process.env.BITBUCKET_TOKEN || answers.bitbucketToken,
         bitbucketWorkspace: process.env.BITBUCKET_WORKSPACE || answers.bitbucketWorkspace,

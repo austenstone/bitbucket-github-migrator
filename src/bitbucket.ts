@@ -7,7 +7,7 @@ import {
   PullRequestResponse,
   Repository,
   RepositoryResponse
-} from './bitbucket.d';
+} from './bitbucket.d.js';
 
 export class BitBucket {
   init = {

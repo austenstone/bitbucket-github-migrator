@@ -1,19 +1,8 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.GitHub = void 0;
-const rest_1 = require("@octokit/rest");
-const plugin_throttling_1 = require("@octokit/plugin-throttling");
-const MyOctokit = rest_1.Octokit.plugin(plugin_throttling_1.throttling);
-class GitHub {
+import { Octokit } from '@octokit/rest';
+import { throttling } from "@octokit/plugin-throttling";
+const MyOctokit = Octokit.plugin(throttling);
+export class GitHub {
+    octokit;
     constructor(token) {
         this.octokit = new MyOctokit({
             auth: token,
@@ -30,25 +19,16 @@ class GitHub {
             },
         });
     }
-    createPullRequest(request) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.octokit.pulls.create(request);
-        });
+    async createPullRequest(request) {
+        return this.octokit.pulls.create(request);
     }
-    createIssueComment(request) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.octokit.issues.createComment(request);
-        });
+    async createIssueComment(request) {
+        return this.octokit.issues.createComment(request);
     }
-    createPullRequestReviewComment(request) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.octokit.pulls.createReviewComment(request);
-        });
+    async createPullRequestReviewComment(request) {
+        return this.octokit.pulls.createReviewComment(request);
     }
-    createRepository(request) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.octokit.repos.createInOrg(request);
-        });
+    async createRepository(request) {
+        return this.octokit.repos.createInOrg(request);
     }
 }
-exports.GitHub = GitHub;

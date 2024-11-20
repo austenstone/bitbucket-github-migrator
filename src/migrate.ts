@@ -1,5 +1,5 @@
-import { BitBucket } from "./bitbucket";
-import { GitHub } from "./github";
+import { BitBucket } from "./bitbucket.js";
+import { GitHub } from "./github.js";
 
 import { SimpleGit, simpleGit } from "simple-git";
 import debug from 'debug';

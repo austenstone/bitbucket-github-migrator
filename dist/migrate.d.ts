@@ -1,5 +1,5 @@
-import { BitBucket } from "./bitbucket";
-import { GitHub } from "./github";
+import { BitBucket } from "./bitbucket.js";
+import { GitHub } from "./github.js";
 import { SimpleGit } from "simple-git";
 export interface MigrateOptions {
     bitbucketWorkspace: string;

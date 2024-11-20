@@ -1,4 +1,4 @@
-import { PullRequestComment, Issue, PullRequest, Repository } from './bitbucket.d';
+import { PullRequestComment, Issue, PullRequest, Repository } from './bitbucket.d.js';
 export declare class BitBucket {
     init: {
         headers: {

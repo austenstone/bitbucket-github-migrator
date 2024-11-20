@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Migrate } from "./migrate";
+import { Migrate } from "./migrate.js";
 import inquirer, { DistinctQuestion } from 'inquirer';
 import 'dotenv/config'
 

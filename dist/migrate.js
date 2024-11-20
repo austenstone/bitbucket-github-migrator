@@ -3,6 +3,7 @@ import { GitHub } from "./github.js";
 import { simpleGit } from "simple-git";
 import debug from 'debug';
 import { rmSync } from "fs";
+import { join } from "path";
 if (process.env.DEBUG) {
     debug.enable('simple-git,simple-git:*');
 }
@@ -11,11 +12,15 @@ export class Migrate {
     github;
     options;
     git;
+    root;
+    reposFolder;
     constructor(options) {
         this.options = options;
         this.bitbucket = new BitBucket(this.options.bitbucketToken, this.options.bitbucketThrottling?.timeout);
         this.github = new GitHub(this.options.githubToken);
         this.git = simpleGit();
+        this.root = process.cwd();
+        this.reposFolder = join(this.root, '_repos');
     }
     async run() {
         if (!this.options.bitbucketWorkspace)
@@ -23,39 +28,52 @@ export class Migrate {
         if (!this.options.githubOwner)
             throw new Error('githubOwner input is required');
         console.log(`🚀 Migrating from Bitbucket workspace '${this.options.bitbucketWorkspace}' to GitHub org '${this.options.githubOwner}'`);
+        rmSync(this.reposFolder, { recursive: true, force: true });
         if (this.options.whatToMigrate.includes('repositories')) {
-            const root = process.cwd();
-            const reposFolder = `${root}/_repos`;
-            rmSync(reposFolder, { recursive: true, force: true });
             for (const repo of await this.bitbucket.getRepositories(this.options.bitbucketWorkspace)) {
                 console.log(`🔄 Git Mirror ${repo.full_name} from Bitbucket to GitHub`);
                 const remote = {
                     source: repo.links.clone[0].href,
                     target: `https://github.com/${this.options.githubOwner}/${repo.name}.git`
                 };
-                const path = `${reposFolder}/${repo.name}`;
                 console.log(`➕ Create GitHub repository ${repo.name}`);
-                await this.github.createRepository({
-                    org: this.options.githubOwner,
-                    name: repo.name,
-                }).catch(err => {
-                    if (err.message.includes('already exists'))
-                        return;
-                });
-                await this.git.mirror(remote.source, path)
-                    .catch(err => {
-                    if (err.message.includes('already exists'))
-                        return;
-                });
-                await this.git.cwd(path);
-                await this.git.addRemote('github', `https://github.com/${this.options.githubOwner}/${repo.name}.git`)
-                    .catch(err => {
-                    if (err.message.includes('already exists'))
-                        return;
-                });
-                await this.git.branch(['-M', 'main'])
-                    .push('--mirror', 'github')
-                    .cwd(root);
+                try {
+                    await this.github.createRepository({
+                        org: this.options.githubOwner,
+                        name: repo.name,
+                    });
+                }
+                catch (error) {
+                    if (error instanceof Error) {
+                        if (error.message.includes('already exists')) {
+                            console.log(`🟢 ${repo.name} already exists on GitHub`);
+                        }
+                        else {
+                            console.error(`❌ Error creating repository ${repo.name} on GitHub: ${error.message}`);
+                            return;
+                        }
+                    }
+                }
+                try {
+                    const path = join(this.reposFolder, repo.name);
+                    await this.git.mirror(remote.source, path);
+                    await this.git.cwd(path);
+                    await this.git.addRemote('github', `https://github.com/${this.options.githubOwner}/${repo.name}.git`);
+                    await this.git.branch(['-M', 'main'])
+                        .push('--mirror', 'github')
+                        .cwd(this.root);
+                }
+                catch (error) {
+                    if (error instanceof Error) {
+                        if (error.message.includes('already exists')) {
+                            console.log(`🟢 ${repo.name} already mirrored`);
+                        }
+                        else {
+                            console.log(`❌ Error mirroring repository ${repo.full_name}: ${error.message}`);
+                            return;
+                        }
+                    }
+                }
                 console.log(`✅ Mirrored ${repo.full_name} from Bitbucket to GitHub`);
             }
         }
@@ -78,7 +96,7 @@ export class Migrate {
                     });
                     if (responsePr) {
                         console.log(`✅ <PR> repo:${repo} title:${pr.title} url:${responsePr.data.html_url}`);
-                        let responsePrComments = {};
+                        const responsePrComments = {};
                         for (const comment of pr.comments) {
                             let responsePrComment;
                             if (comment.inline) {

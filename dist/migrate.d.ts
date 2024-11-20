@@ -16,6 +16,8 @@ export declare class Migrate {
     github: GitHub;
     options: MigrateOptions;
     git: SimpleGit;
+    root: string;
+    reposFolder: string;
     constructor(options: MigrateOptions);
     run(): Promise<void>;
 }
